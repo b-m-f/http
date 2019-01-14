@@ -5,8 +5,10 @@ except ImportError:
     from urlparse import urlparse
 
 # Third-party packages
+import redis
 import requests
-import requests_cache
+from cachecontrol import CacheControl
+from cachecontrol.caches.redis_cache import RedisCache
 
 try:
     # If prometheus is available, set up metric counters
@@ -65,6 +67,7 @@ class BaseSession(object):
 
         self.headers.update(headers)
 
+
     def request(self, method, url, **kwargs):
         domain = urlparse(url).netloc
 
@@ -100,7 +103,7 @@ class UncachedSession(BaseSession, requests.Session):
     pass
 
 
-class CachedSession(BaseSession, requests_cache.CachedSession):
+class CachedSession(BaseSession, requests.Session):
     """
     A session object for making HTTP requests with cached responses.
 
@@ -110,14 +113,15 @@ class CachedSession(BaseSession, requests_cache.CachedSession):
 
     def __init__(
         self,
-        backend='sqlite', expire_after=5, include_get_headers=True,
+        redis_port='6379', redis_host='localhost', redis_db=0,
         *args,
         **kwargs
     ):
 
         super(CachedSession, self).__init__(
             *args,
-            backend=backend, expire_after=expire_after,
-            include_get_headers=include_get_headers,
             **kwargs
         )
+        pool = redis.ConnectionPool(host=redis_host, port=redis_port, db=redis_db)
+        r = redis.Redis(connection_pool=pool)
+        self = CacheControl(self, RedisCache(r))

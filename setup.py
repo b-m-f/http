@@ -17,5 +17,7 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         "requests>=2.10.0",
+        "redis>=3.0.1",
+        "CacheControl>=0.12.5"
     ],
 )
