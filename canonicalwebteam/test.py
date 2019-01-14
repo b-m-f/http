@@ -5,12 +5,13 @@ import time
 
 sess = CachedSession()
 print(sess)
-headers = {'Cache-Control': 'max-age=500'}
 for i in range(9):
     print("start")
     print(datetime.now())
-    response = sess.get('https://ehlers.berlin', headers=headers)
-    print("end")
+    response = sess.get('https://ehlers.berlin')
+    
+    print("is response from cache")
+    print(response.from_cache)
     print(datetime.now())
     print(response.headers)
     time.sleep(10)

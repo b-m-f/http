@@ -9,6 +9,7 @@ import redis
 import requests
 from cachecontrol import CacheControl
 from cachecontrol.caches.redis_cache import RedisCache
+from cachecontrol.heuristics import ExpiresAfter
 
 try:
     # If prometheus is available, set up metric counters
@@ -124,4 +125,4 @@ class CachedSession(BaseSession, requests.Session):
         )
         pool = redis.ConnectionPool(host=redis_host, port=redis_port, db=redis_db)
         r = redis.Redis(connection_pool=pool)
-        self = CacheControl(self, RedisCache(r))
+        self = CacheControl(self, RedisCache(r), heuristic=ExpiresAfter(seconds=5))
